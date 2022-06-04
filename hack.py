@@ -102,3 +102,4 @@ except django.core.exceptions.ObjectDoesNotExist:
 fix_marks(kid_object)
 remove_chastisements(kid_object)
 create_commendation(kid_object, subject_name)
+print(f'Записи для {kid_name} исправлены. Похвала по {subject_name} добавлена')
