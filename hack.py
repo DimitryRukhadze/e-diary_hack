@@ -75,7 +75,7 @@ except django.core.exceptions.MultipleObjectsReturned:
     print(same_name_kids)
     exit()
 except django.core.exceptions.ObjectDoesNotExist:
-    logging.critical('Ученика с таким именем нет.')
+    logging.critical('Ученика с таким именем нет. Проверьте правильность написания')
     exit()
 
 subject_names = '\n'.join(
