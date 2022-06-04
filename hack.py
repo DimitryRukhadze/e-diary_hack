@@ -59,17 +59,26 @@ def remove_chastisements(schoolkid):
 
 logging.basicConfig(format=f'%(levelname)s %(message)s')
 
+kid_name = input('Введите имя ученика: ')
+same_name_kids = '\n'.join(
+    [
+        f'{kid.full_name} {kid.year_of_study}{kid.group_letter}'
+        for kid in Schoolkid.objects.filter(
+            full_name__contains=kid_name
+            )
+    ]
+)
 try:
-    kid_name = input('Введите имя ученика: ')
     kid_object = Schoolkid.objects.get(full_name__contains=kid_name)
 except django.core.exceptions.MultipleObjectsReturned:
-    logging.critical('Много похожих имён. Введите более точное')
+    logging.critical('Много похожих имён. Ввведите одно из них')
+    print(same_name_kids)
     exit()
 except django.core.exceptions.ObjectDoesNotExist:
     logging.critical('Ученика с таким именем нет.')
     exit()
 
-subject_names = ' '.join(
+subject_names = '\n'.join(
     [
         subject.title
         for subject in Subject.objects.filter(
