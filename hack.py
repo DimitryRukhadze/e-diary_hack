@@ -1,0 +1,95 @@
+import random
+import logging
+
+from itertools import zip_longest
+
+
+import django.core.exceptions
+
+from datacenter.models import Lesson, Schoolkid, Commendation, Chastisement, Mark, Subject
+
+
+def create_commendation(schoolkid, subject_name):
+
+    subject_lessons = Lesson.objects.filter(
+        year_of_study=schoolkid.year_of_study,
+        group_letter=schoolkid.group_letter,
+        subject__title=subject_name
+    ).order_by('-date')
+
+    child_commends = Commendation.objects.filter(
+        subject__title=subject_name,
+        schoolkid=schoolkid
+    ).order_by('-created')
+
+    availible_commends = [
+        'Молодец!',
+        'Отлично!',
+        'Хорошо!',
+        'Ты меня приятно удивил!',
+        'Великолепно!',
+        'Прекрасно!',
+        'Ты меня очень обрадовал!',
+    ]
+
+    for lesson, commendation in zip_longest(subject_lessons, child_commends):
+        if lesson and not commendation:
+            Commendation.objects.create(
+                text=random.choice(availible_commends),
+                created=lesson.date,
+                teacher=lesson.teacher,
+                schoolkid=schoolkid,
+                subject=lesson.subject
+            )
+            break
+
+
+def fix_marks(schoolkid):
+    child_marks = Mark.objects.filter(schoolkid=schoolkid.id, points__lt=4)
+    for mark in child_marks:
+        mark_to_change = Mark.objects.get(id=mark.id)
+        mark_to_change.points = 5
+        mark_to_change.save()
+
+
+def remove_chastisements(schoolkid):
+    child_chasts = Chastisement.objects.filter(schoolkid=schoolkid)
+    child_chasts.delete()
+
+
+logging.basicConfig(format=f'%(levelname)s %(message)s')
+
+try:
+    kid_name = input('Введите имя ученика: ')
+    kid_object = Schoolkid.objects.get(full_name__contains=kid_name)
+except django.core.exceptions.MultipleObjectsReturned:
+    logging.critical('Много похожих имён. Введите более точное')
+    exit()
+except django.core.exceptions.ObjectDoesNotExist:
+    logging.critical('Ученика с таким именем нет.')
+    exit()
+
+subject_names = ' '.join(
+    [
+        subject.title
+        for subject in Subject.objects.filter(
+            year_of_study=kid_object.year_of_study
+            )
+    ]
+)
+
+try:
+    subject_name = input('Введите название предмета: ')
+    subject_object = Subject.objects.get(
+        title=subject_name,
+        year_of_study=kid_object.year_of_study
+    )
+except django.core.exceptions.ObjectDoesNotExist:
+    logging.critical('Такого урока нет у этого ученика')
+    print('Вот правильные названия уроков:')
+    print(subject_names)
+    exit()
+
+fix_marks(kid_object)
+remove_chastisements(kid_object)
+create_commendation(kid_object, subject_name)
