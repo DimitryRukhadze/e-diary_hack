@@ -47,9 +47,8 @@ def create_commendation(schoolkid, subject_name):
 def fix_marks(schoolkid):
     child_marks = Mark.objects.filter(schoolkid=schoolkid.id, points__lt=4)
     for mark in child_marks:
-        mark_to_change = Mark.objects.get(id=mark.id)
-        mark_to_change.points = 5
-        mark_to_change.save()
+        mark.points = 5
+        mark.save()
 
 
 def remove_chastisements(schoolkid):
