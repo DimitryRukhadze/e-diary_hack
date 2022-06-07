@@ -56,35 +56,48 @@ def remove_chastisements(schoolkid):
     child_chasts.delete()
 
 
+def get_similar_names(name_to_search):
+
+    same_name_kids = '\n'.join(
+        [
+            f'{kid.full_name} {kid.year_of_study}{kid.group_letter}'
+            for kid in Schoolkid.objects.filter(
+                full_name__contains=name_to_search
+                )
+        ]
+    )
+
+    return same_name_kids
+
+
+def get_subject_names_for_kid(kid):
+    subject_names = '\n'.join(
+        [
+            subject.title
+            for subject in Subject.objects.filter(
+                year_of_study=kid.year_of_study
+                )
+        ]
+    )
+    return subject_names
+
+
 logging.basicConfig(format=f'%(levelname)s %(message)s')
 
 kid_name = input('Введите имя ученика: ')
-same_name_kids = '\n'.join(
-    [
-        f'{kid.full_name} {kid.year_of_study}{kid.group_letter}'
-        for kid in Schoolkid.objects.filter(
-            full_name__contains=kid_name
-            )
-    ]
-)
+similar_names = get_similar_names(kid_name)
+
 try:
     kid_object = Schoolkid.objects.get(full_name__contains=kid_name)
 except django.core.exceptions.MultipleObjectsReturned:
     logging.critical('Много похожих имён. Ввведите одно из них')
-    print(same_name_kids)
+    print(similar_names)
     exit()
 except django.core.exceptions.ObjectDoesNotExist:
     logging.critical('Ученика с таким именем нет. Проверьте правильность написания')
     exit()
 
-subject_names = '\n'.join(
-    [
-        subject.title
-        for subject in Subject.objects.filter(
-            year_of_study=kid_object.year_of_study
-            )
-    ]
-)
+kid_subject_names = get_subject_names_for_kid(kid_object)
 
 try:
     subject_name = input('Введите название предмета: ')
@@ -95,7 +108,7 @@ try:
 except django.core.exceptions.ObjectDoesNotExist:
     logging.critical('Такого урока нет у этого ученика')
     print('Вот правильные названия уроков:')
-    print(subject_names)
+    print(kid_subject_names)
     exit()
 
 fix_marks(kid_object)
