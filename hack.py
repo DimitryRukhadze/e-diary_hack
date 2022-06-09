@@ -80,9 +80,7 @@ def get_subject_names_for_kid(kid):
         ]
     )
     return subject_names
-
-
-if __name__ == '__main__':
+def hack_diary():
     logging.basicConfig(format=f'%(levelname)s %(message)s')
 
     kid_name = input('Введите имя ученика: ')
@@ -116,3 +114,7 @@ if __name__ == '__main__':
     remove_chastisements(kid_object)
     create_commendation(kid_object, subject_name)
     print(f'Записи для {kid_name} исправлены. Похвала по {subject_name} добавлена')
+
+
+if __name__ == '__main__':
+    hack_diary()
