@@ -80,7 +80,9 @@ def get_subject_names_for_kid(kid):
         ]
     )
     return subject_names
-def hack_diary():
+
+
+def main():
     logging.basicConfig(format=f'%(levelname)s %(message)s')
 
     kid_name = input('Введите имя ученика: ')
@@ -117,4 +119,4 @@ def hack_diary():
 
 
 if __name__ == '__main__':
-    hack_diary()
+    main()
